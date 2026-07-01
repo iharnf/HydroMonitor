@@ -13,10 +13,10 @@ substitutions:
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
-  comment: "pH-монитор для гидропоники, v0.1.0"
+  comment: "HydroMonitor diagnostic firmware, v0.1.1"
   project:
     name: hydromonitor.ph_monitor
-    version: "0.1.0"
+    version: "0.1.1"
 
 esp32:
   board: m5stick-c
@@ -49,70 +49,9 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
-spi:
-  clk_pin: ${display_spi_clk}
-  mosi_pin: ${display_spi_mosi}
-
-output:
-  - platform: gpio
-    pin: ${display_backlight}
-    id: lcd_backlight_pin
-
-light:
-  - platform: binary
-    name: "Display Backlight"
-    id: lcd_backlight
-    output: lcd_backlight_pin
-    restore_mode: ALWAYS_ON
-    entity_category: config
-
-font:
-  - file: "gfonts://Roboto Condensed"
-    id: font_title
-    size: 16
-    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-  - file: "gfonts://Roboto Condensed"
-    id: font_label
-    size: 18
-    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-  - file: "gfonts://Roboto Condensed"
-    id: font_value
-    size: 30
-    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-  - file: "gfonts://Roboto Condensed"
-    id: font_ph
-    size: 64
-    glyphs: " -.0123456789"
-
-color:
-  - id: color_bg
-    red: 0%
-    green: 0%
-    blue: 0%
-  - id: color_text
-    red: 100%
-    green: 100%
-    blue: 100%
-  - id: color_muted
-    red: 55%
-    green: 61%
-    blue: 67%
-  - id: color_ok
-    red: 23%
-    green: 85%
-    blue: 45%
-  - id: color_warn
-    red: 100%
-    green: 78%
-    blue: 20%
-  - id: color_alert
-    red: 100%
-    green: 20%
-    blue: 16%
-  - id: color_panel
-    red: 8%
-    green: 10%
-    blue: 12%
+# Display is temporarily disabled in v0.1.1.
+# Goal: confirm that Wi-Fi, API, web_server and ADC are stable first.
+# After that we will enable the M5StickC Plus2 ST7789 display with verified pins.
 
 globals:
   - id: ph_ready
@@ -187,52 +126,9 @@ button:
     on_press:
       - logger.log: "Calibration will be implemented in v0.2.0 after real mV values are verified."
 
-display:
-  - platform: ili9xxx
-    id: lcd
-    model: ST7789V
-    cs_pin: ${display_cs}
-    dc_pin: ${display_dc}
-    reset_pin: ${display_reset}
-    dimensions:
-      width: 135
-      height: 240
-      offset_width: 52
-      offset_height: 40
-    transform:
-      swap_xy: true
-      mirror_x: false
-      mirror_y: true
-    invert_colors: true
-    update_interval: 1s
-    lambda: |-
-      it.fill(id(color_bg));
-
-      it.printf(120, 4, id(font_title), id(color_muted), TextAlign::TOP_CENTER, "HYDROMONITOR");
-
-      // В v0.1.0 pH намеренно не рассчитывается. Сначала проверяем стабильные mV.
-      it.printf(120, 24, id(font_ph), id(color_muted), TextAlign::TOP_CENTER, "--.--");
-
-      it.filled_rectangle(12, 86, 216, 30, id(color_panel));
-      it.printf(22, 91, id(font_label), id(color_muted), TextAlign::TOP_LEFT, "Probe");
-      if (id(ph_probe_voltage).has_state()) {
-        it.printf(218, 86, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "%.0f mV", id(ph_probe_voltage).state);
-      } else {
-        it.printf(218, 86, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "---- mV");
-      }
-
-      if (id(wifi_rssi).has_state()) {
-        int bars = 1;
-        if (id(wifi_rssi).state > -55) {
-          bars = 4;
-        } else if (id(wifi_rssi).state > -67) {
-          bars = 3;
-        } else if (id(wifi_rssi).state > -78) {
-          bars = 2;
-        }
-        it.printf(14, 132, id(font_label), id(color_text), TextAlign::BOTTOM_LEFT, "WiFi %d/4", bars);
-      } else {
-        it.printf(14, 132, id(font_label), id(color_muted), TextAlign::BOTTOM_LEFT, "WiFi --");
-      }
-
-      it.printf(226, 132, id(font_label), id(color_ok), TextAlign::BOTTOM_RIGHT, "USB");
+interval:
+  - interval: 10s
+    then:
+      - logger.log:
+          format: "HydroMonitor alive. Probe voltage: %.0f mV"
+          args: [ 'id(ph_probe_voltage).state' ]

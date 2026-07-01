@@ -8,6 +8,7 @@ substitutions:
   display_dc: GPIO23
   display_reset: GPIO18
   display_backlight: GPIO27
+  setup_ap_password: hydromonitor
 
 esphome:
   name: ${device_name}
@@ -34,7 +35,7 @@ wifi:
   password: !secret wifi_password
   ap:
     ssid: "HydroMonitor Setup"
-    password: !secret fallback_ap_password
+    password: ${setup_ap_password}
 
 captive_portal:
 

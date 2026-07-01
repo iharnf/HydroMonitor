@@ -1,26 +1,26 @@
-# Wiring
+# Подключение
 
 ## v0.1.0
 
-| Signal | PH-4502C | M5StickC Plus2 |
+| Сигнал | PH-4502C | M5StickC Plus2 |
 | --- | --- | --- |
-| Power | VCC | 5V |
-| Ground | GND | GND |
-| Analog pH output | Po | GPIO36 |
-| Digital threshold output | Do | NC |
-| Temperature output | To | NC |
+| Питание | VCC | 5V |
+| Земля | GND | GND |
+| Аналоговый выход pH | Po | GPIO36 |
+| Цифровой пороговый выход | Do | NC |
+| Температурный выход | To | NC |
 
-Before connecting `Po` to the ESP32, measure voltage between `Po` and `GND`.
-The current hardware measured 2.7 V, which is below the ESP32 3.3 V input limit.
+Перед подключением `Po` к ESP32 нужно измерить напряжение между `Po` и `GND`.
+На текущем железе получилось 2.7 V, это ниже предела входа ESP32 3.3 V.
 
-## Planned DS18B20
+## Планируемый DS18B20
 
-This part is not enabled in firmware yet.
+Эта часть пока не включена в прошивке.
 
 | DS18B20 | M5StickC Plus2 |
 | --- | --- |
-| Red | 5V |
-| Black | GND |
-| Yellow / DATA | GPIO32 |
+| Красный | 5V |
+| Черный | GND |
+| Желтый / DATA | GPIO32 |
 
-Add a 4.7 kOhm resistor between DATA and 5V.
+Между DATA и 5V нужно добавить резистор 4.7 кОм.

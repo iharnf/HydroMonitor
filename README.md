@@ -1,48 +1,48 @@
 # HydroMonitor
 
-HydroMonitor is an ESPHome firmware project for a small hydroponic pH monitor.
+HydroMonitor - проект прошивки ESPHome для компактного pH-монитора гидропоники.
 
-Current target hardware:
+Текущая целевая аппаратная часть:
 
 - M5StickC Plus2
-- PH-4502C pH interface board
-- E-201 / PH-201 pH probe
-- DS18B20 temperature sensor planned later
+- плата интерфейса pH PH-4502C
+- pH-электрод E-201 / PH-201
+- датчик температуры DS18B20 будет добавлен позже
 
-Version `0.1.0` is intentionally focused on the first safe test:
+Версия `0.1.0` специально сосредоточена на первом безопасном тесте:
 
-- boot the M5StickC Plus2
-- connect to Wi-Fi and Home Assistant
-- enable OTA
-- read the PH-4502C analog output on `GPIO36`
-- show filtered probe voltage in mV on the display
+- запустить M5StickC Plus2
+- подключиться к Wi-Fi и Home Assistant
+- включить OTA-обновления
+- читать аналоговый выход PH-4502C на `GPIO36`
+- показывать отфильтрованное напряжение электрода в mV на дисплее
 
-pH calculation is not enabled yet. First we verify stable real mV readings from the connected probe.
+Расчет pH пока не включен. Сначала проверяем стабильные реальные показания mV с подключенного электрода.
 
-## Wiring
+## Подключение
 
 | PH-4502C | M5StickC Plus2 |
 | --- | --- |
 | VCC | 5V |
 | GND | GND |
 | Po | GPIO36 |
-| Do | not connected |
-| To | not connected |
+| Do | не подключать |
+| To | не подключать |
 
-The measured `Po` voltage was 2.7 V, so it is safe for the ESP32 ADC input in this build.
+Измеренное напряжение `Po` составило 2.7 V, поэтому в этой сборке его можно безопасно подключать к ADC-входу ESP32.
 
-## First Flash
+## Первая прошивка
 
-1. Copy `esphome/secrets.example.yaml` to `esphome/secrets.yaml`.
-2. Fill in Wi-Fi values.
-3. Open the project in ESPHome.
-4. Install `esphome/hydromonitor.yaml` over USB.
+1. Скопируй `esphome/secrets.example.yaml` в `esphome/secrets.yaml`.
+2. Впиши данные Wi-Fi.
+3. Открой проект в ESPHome.
+4. Установи `esphome/hydromonitor.yaml` по USB.
 
-After the first successful flash, future updates can use OTA.
+После первой успешной прошивки следующие обновления можно будет делать по OTA.
 
-## Roadmap
+## План
 
-- `v0.1.0` - mV reading, display, Home Assistant, OTA.
-- `v0.2.0` - pH calculation and two-point software calibration.
-- `v0.3.0` - DS18B20 and temperature compensation.
-- `v1.0.0` - stable release.
+- `v0.1.0` - чтение mV, дисплей, Home Assistant, OTA.
+- `v0.2.0` - расчет pH и двухточечная программная калибровка.
+- `v0.3.0` - DS18B20 и температурная компенсация.
+- `v1.0.0` - стабильный релиз.

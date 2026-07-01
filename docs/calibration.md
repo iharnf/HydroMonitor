@@ -1,11 +1,11 @@
-# Calibration
+# Калибровка
 
-Calibration is planned for `v0.2.0`.
+Калибровка запланирована для `v0.2.0`.
 
-The project will not use a generic internet formula for pH conversion. Every pH probe and PH-4502C board pair behaves differently, so HydroMonitor will use two-point software calibration:
+Проект не будет использовать универсальную формулу pH из интернета. Каждая пара pH-электрода и платы PH-4502C ведет себя немного по-своему, поэтому HydroMonitor будет использовать двухточечную программную калибровку:
 
-1. Put the probe in pH 7.00 buffer and record mV.
-2. Put the probe in pH 4.00 or pH 10.00 buffer and record mV.
-3. Calculate pH using linear interpolation.
+1. Поместить электрод в буфер pH 7.00 и записать mV.
+2. Поместить электрод в буфер pH 4.00 или pH 10.00 и записать mV.
+3. Рассчитывать pH через линейную интерполяцию.
 
-For `v0.1.0`, only the filtered probe voltage is shown. This lets us confirm that the ADC input and wiring are stable before adding pH math.
+В `v0.1.0` отображается только отфильтрованное напряжение электрода. Это позволит убедиться, что ADC-вход и подключение работают стабильно, прежде чем добавлять расчет pH.

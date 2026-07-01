@@ -1,9 +1,9 @@
-# Changelog
+# История изменений
 
 ## 0.1.0
 
-- Add initial ESPHome firmware for M5StickC Plus2.
-- Read PH-4502C analog output on GPIO36.
-- Show filtered probe voltage in mV on the display.
-- Enable Wi-Fi, API, OTA, web server, and Home Assistant diagnostics.
-- Add commented plan for DS18B20.
+- Добавлена первая прошивка ESPHome для M5StickC Plus2.
+- Добавлено чтение аналогового выхода PH-4502C на GPIO36.
+- Добавлен вывод отфильтрованного напряжения электрода в mV на дисплей.
+- Включены Wi-Fi, API, OTA, web server и диагностика Home Assistant.
+- Добавлена закомментированная заготовка под DS18B20.

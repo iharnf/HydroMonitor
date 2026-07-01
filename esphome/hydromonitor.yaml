@@ -12,7 +12,7 @@ substitutions:
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
-  comment: "Hydroponic pH monitor, v0.1.0"
+  comment: "pH-монитор для гидропоники, v0.1.0"
   project:
     name: hydromonitor.ph_monitor
     version: "0.1.0"
@@ -153,12 +153,12 @@ sensor:
     update_interval: 60s
     entity_category: diagnostic
 
-  # DS18B20 will be added in v0.3.0.
-  # Hardware plan:
+  # DS18B20 будет добавлен в v0.3.0.
+  # План подключения:
   #   DATA -> GPIO32
   #   VCC  -> 5V
   #   GND  -> GND
-  #   4.7 kOhm resistor between DATA and VCC
+  #   резистор 4.7 кОм между DATA и VCC
   #
   # - platform: dallas_temp
   #   id: water_temperature
@@ -209,7 +209,7 @@ display:
 
       it.printf(120, 4, id(font_title), id(color_muted), TextAlign::TOP_CENTER, "HYDROMONITOR");
 
-      // pH is intentionally not calculated in v0.1.0. First we verify stable mV.
+      // В v0.1.0 pH намеренно не рассчитывается. Сначала проверяем стабильные mV.
       it.printf(120, 24, id(font_ph), id(color_muted), TextAlign::TOP_CENTER, "--.--");
 
       it.filled_rectangle(12, 86, 216, 30, id(color_panel));

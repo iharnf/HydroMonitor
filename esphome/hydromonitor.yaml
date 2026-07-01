@@ -13,10 +13,10 @@ substitutions:
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
-  comment: "HydroMonitor diagnostic firmware, v0.1.1"
+  comment: "HydroMonitor display test firmware, v0.1.2"
   project:
     name: hydromonitor.ph_monitor
-    version: "0.1.1"
+    version: "0.1.2"
 
 esp32:
   board: m5stick-c
@@ -49,9 +49,45 @@ time:
   - platform: homeassistant
     id: homeassistant_time
 
-# Display is temporarily disabled in v0.1.1.
-# Goal: confirm that Wi-Fi, API, web_server and ADC are stable first.
-# After that we will enable the M5StickC Plus2 ST7789 display with verified pins.
+spi:
+  clk_pin: ${display_spi_clk}
+  mosi_pin: ${display_spi_mosi}
+
+font:
+  - file: "gfonts://Roboto Condensed"
+    id: font_title
+    size: 16
+    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  - file: "gfonts://Roboto Condensed"
+    id: font_label
+    size: 18
+    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  - file: "gfonts://Roboto Condensed"
+    id: font_value
+    size: 28
+    glyphs: " !\"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  - file: "gfonts://Roboto Condensed"
+    id: font_ph
+    size: 56
+    glyphs: " -.0123456789"
+
+color:
+  - id: color_bg
+    red: 0%
+    green: 0%
+    blue: 0%
+  - id: color_text
+    red: 100%
+    green: 100%
+    blue: 100%
+  - id: color_muted
+    red: 55%
+    green: 61%
+    blue: 67%
+  - id: color_ok
+    red: 23%
+    green: 85%
+    blue: 45%
 
 globals:
   - id: ph_ready
@@ -132,3 +168,42 @@ interval:
       - logger.log:
           format: "HydroMonitor alive. Probe voltage: %.0f mV"
           args: [ 'id(ph_probe_voltage).state' ]
+
+display:
+  - platform: st7789v
+    id: lcd
+    model: TTGO TDisplay 135x240
+    cs_pin: ${display_cs}
+    dc_pin: ${display_dc}
+    reset_pin: ${display_reset}
+    backlight_pin: ${display_backlight}
+    rotation: 270
+    update_interval: 1s
+    lambda: |-
+      it.fill(id(color_bg));
+
+      it.printf(120, 4, id(font_title), id(color_muted), TextAlign::TOP_CENTER, "HYDROMONITOR");
+      it.printf(120, 23, id(font_ph), id(color_muted), TextAlign::TOP_CENTER, "--.--");
+
+      it.printf(16, 88, id(font_label), id(color_muted), TextAlign::TOP_LEFT, "Probe");
+      if (id(ph_probe_voltage).has_state()) {
+        it.printf(224, 82, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "%.0f mV", id(ph_probe_voltage).state);
+      } else {
+        it.printf(224, 82, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "---- mV");
+      }
+
+      if (id(wifi_rssi).has_state()) {
+        int bars = 1;
+        if (id(wifi_rssi).state > -55) {
+          bars = 4;
+        } else if (id(wifi_rssi).state > -67) {
+          bars = 3;
+        } else if (id(wifi_rssi).state > -78) {
+          bars = 2;
+        }
+        it.printf(16, 132, id(font_label), id(color_text), TextAlign::BOTTOM_LEFT, "WiFi %d/4", bars);
+      } else {
+        it.printf(16, 132, id(font_label), id(color_muted), TextAlign::BOTTOM_LEFT, "WiFi --");
+      }
+
+      it.printf(224, 132, id(font_label), id(color_ok), TextAlign::BOTTOM_RIGHT, "USB");

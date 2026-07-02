@@ -217,7 +217,7 @@ display:
       float temp = id(water_temp).has_state() ? id(water_temp).state : NAN;
       float mv = id(ph_probe_voltage).has_state() ? id(ph_probe_voltage).state : NAN;
       float rssi = id(wifi_rssi).has_state() ? id(wifi_rssi).state : NAN;
-      String status = id(ph_status).has_state() ? id(ph_status).state : "----";
+      std::string status = id(ph_status).has_state() ? id(ph_status).state : "----";
 
       // --- определяем цвет pH ---
       Color ph_color;

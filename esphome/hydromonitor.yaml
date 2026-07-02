@@ -172,9 +172,8 @@ display:
   - platform: st7789v
     id: lcd
     model: Custom
-    dimensions:
-      width: 135
-      height: 240
+    width: 135
+    height: 240
     offset_width: 52
     offset_height: 40
     cs_pin: ${display_cs}

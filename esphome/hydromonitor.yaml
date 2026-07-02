@@ -175,7 +175,6 @@ display:
     cs_pin: ${display_cs}
     dc_pin: ${display_dc}
     reset_pin: ${display_reset}
-    backlight_pin: ${display_backlight}
     rotation: 270
     update_interval: 1s
     lambda: |-

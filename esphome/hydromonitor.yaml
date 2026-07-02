@@ -66,7 +66,7 @@ one_wire:
 font:
   - file: "gfonts://Roboto Condensed"
     id: font_status
-    size: 14
+    size: 16
     glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_header
@@ -78,8 +78,8 @@ font:
     glyphs: ' -.0123456789'
   - file: "gfonts://Roboto Condensed"
     id: font_data
-    size: 14
-    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя▂▄▆█'
+    size: 22
+    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
 
 # === Цвета ===
 color:
@@ -109,12 +109,12 @@ color:
     blue: 15%
   - id: color_cyan
     red: 0%
-    green: 82%
+    green: 85%
     blue: 100%
-  - id: color_cyan_dim
-    red: 0%
-    green: 60%
-    blue: 75%
+  - id: color_orange
+    red: 100%
+    green: 65%
+    blue: 15%
 
 # === Датчики ===
 sensor:
@@ -218,91 +218,55 @@ display:
     rotation: 0
     update_interval: 1s
     lambda: |-
-      // --- фон ---
       it.fill(id(color_bg));
 
-      int cx = it.get_width() / 2;  // = 67
+      int cx = it.get_width() / 2;
 
-      // --- читаем данные ---
       float ph = id(ph_value).has_state() ? id(ph_value).state : NAN;
       float temp = id(water_temp).has_state() ? id(water_temp).state : NAN;
       float mv = id(ph_probe_voltage).has_state() ? id(ph_probe_voltage).state : NAN;
       float rssi = id(wifi_rssi).has_state() ? id(wifi_rssi).state : NAN;
       std::string status = id(ph_status).has_state() ? id(ph_status).state : "----";
 
-      // --- цвет по pH ---
-      Color ph_color;
-      Color status_color;
-      bool is_alarm = false;
+      Color ph_color, st_color;
+      bool alarm = false;
+      if (isnan(ph)) { ph_color = id(color_gray); st_color = id(color_gray); }
+      else if (ph < 5.4) { ph_color = id(color_red); st_color = id(color_red); alarm = true; }
+      else if (ph < 5.7) { ph_color = id(color_yellow); st_color = id(color_yellow); }
+      else { ph_color = id(color_green); st_color = id(color_green); }
 
-      if (isnan(ph)) {
-        ph_color = id(color_gray);
-        status_color = id(color_gray);
-      } else if (ph < 5.4) {
-        ph_color = id(color_red);
-        status_color = id(color_red);
-        is_alarm = true;
-      } else if (ph < 5.7) {
-        ph_color = id(color_yellow);
-        status_color = id(color_yellow);
-      } else {
-        ph_color = id(color_green);
-        status_color = id(color_green);
-      }
+      bool blink = (millis() / 500) % 2 == 0;
 
-      bool blink_on = (millis() / 500) % 2 == 0;
+      // ==== Всё по центру, крупно ====
 
-      // --- бары сигнала ▂▄▆█ ---
-      std::string bars;
-      if (isnan(rssi)) {
-        bars = "----";
-      } else {
-        int s = (int)rssi;
-        if (s > -50)      bars = "███";
-        else if (s > -60) bars = "▆▆█";
-        else if (s > -70) bars = "▆▄█";
-        else if (s > -80) bars = "▄▂█";
-        else              bars = "▂▂▂";
-      }
+      // HYDROPONIC — cyan вверху
+      it.printf(cx, 0, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
 
-      // ========== РИСУЕМ ==========
+      // Статус — центрирован, строкой ниже
+      it.printf(cx, 18, id(font_status), st_color, TextAlign::TOP_CENTER, "%s", status.c_str());
 
-      // HYDROPONIC — верхняя строка, по центру
-      it.printf(cx, 2, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
+      // pH — огромное
+      if (isnan(ph))
+        it.printf(cx, 44, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
+      else if (alarm && !blink)
+        it.printf(cx, 44, id(font_ph), id(color_bg), TextAlign::TOP_CENTER, "%.2f", ph);
+      else
+        it.printf(cx, 44, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
 
-      // Статус — строка ниже, слева (чтобы не налезало на HYDROPONIC)
-      it.printf(3, 20, id(font_status), status_color, TextAlign::TOP_LEFT, "%s", status.c_str());
-
-      // pH — крупно, по центру
-      int ph_y = 44;
-      if (isnan(ph)) {
-        it.printf(cx, ph_y, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
-      } else if (is_alarm && !blink_on) {
-        it.printf(cx, ph_y, id(font_ph), id(color_bg), TextAlign::TOP_CENTER, "%.2f", ph);
-      } else {
-        it.printf(cx, ph_y, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
-      }
-
-      // Блок данных — левый край
-      int data_y = 128;
-      int line_h = 15;
-
-      // Температура
+      // Температура — оранжевая
       if (!isnan(temp))
-        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
+        it.printf(cx, 128, id(font_data), id(color_orange), TextAlign::TOP_CENTER, "%.1f°C", temp);
       else
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
-      data_y += line_h;
+        it.printf(cx, 128, id(font_data), id(color_gray), TextAlign::TOP_CENTER, "--.-°C");
 
-      // mV
+      // mV — белая
       if (!isnan(mv))
-        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
+        it.printf(cx, 155, id(font_data), id(color_white), TextAlign::TOP_CENTER, "%.0fmV", mv);
       else
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
-      data_y += line_h;
+        it.printf(cx, 155, id(font_data), id(color_gray), TextAlign::TOP_CENTER, "----mV");
 
-      // Сигнал с барами
+      // Сигнал — cyan
       if (!isnan(rssi))
-        it.printf(5, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "S: %.0f dB %s", rssi, bars.c_str());
+        it.printf(cx, 182, id(font_data), id(color_cyan), TextAlign::TOP_CENTER, "%.0f dBm", rssi);
       else
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "S: -- dB ----");
+        it.printf(cx, 182, id(font_data), id(color_gray), TextAlign::TOP_CENTER, "-- dBm");

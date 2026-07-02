@@ -203,7 +203,6 @@ binary_sensor:
       inverted: true
       mode:
         input: true
-        pullup: true
   - platform: gpio
     id: button_b
     name: "Button B"
@@ -212,7 +211,6 @@ binary_sensor:
       inverted: true
       mode:
         input: true
-        pullup: true
     on_press:
       then:
         - logger.log: "Button B pressed"

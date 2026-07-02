@@ -74,7 +74,7 @@ font:
     glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_ph
-    size: 68
+    size: 56
     glyphs: ' -.0123456789'
   - file: "gfonts://Roboto Condensed"
     id: font_data
@@ -229,13 +229,10 @@ display:
       std::string status = id(ph_status).has_state() ? id(ph_status).state : "----";
 
       Color ph_color, st_color;
-      bool alarm = false;
       if (isnan(ph)) { ph_color = id(color_gray); st_color = id(color_gray); }
-      else if (ph < 5.4) { ph_color = id(color_red); st_color = id(color_red); alarm = true; }
+      else if (ph < 5.4) { ph_color = id(color_red); st_color = id(color_red); }
       else if (ph < 5.7) { ph_color = id(color_yellow); st_color = id(color_yellow); }
       else { ph_color = id(color_green); st_color = id(color_green); }
-
-      bool blink = (millis() / 500) % 2 == 0;
 
       // ==== Всё по центру, крупно ====
 
@@ -245,13 +242,11 @@ display:
       // Статус — центрирован, строкой ниже
       it.printf(cx, 18, id(font_status), st_color, TextAlign::TOP_CENTER, "%s", status.c_str());
 
-      // pH — огромное
+      // pH — всегда видимое, без мигания
       if (isnan(ph))
-        it.printf(cx, 44, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
-      else if (alarm && !blink)
-        it.printf(cx, 44, id(font_ph), id(color_bg), TextAlign::TOP_CENTER, "%.2f", ph);
+        it.printf(cx, 40, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
       else
-        it.printf(cx, 44, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
+        it.printf(cx, 40, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
 
       // Температура — оранжевая
       if (!isnan(temp))

@@ -67,11 +67,11 @@ font:
   - file: "gfonts://Roboto Condensed"
     id: font_status
     size: 14
-    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
+    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_header
     size: 14
-    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
+    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_ph
     size: 52
@@ -79,7 +79,7 @@ font:
   - file: "gfonts://Roboto Condensed"
     id: font_data
     size: 14
-    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
+    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
 
 # === Цвета ===
 color:

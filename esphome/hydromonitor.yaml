@@ -1,7 +1,7 @@
 substitutions:
   device_name: hydromonitor
   friendly_name: HydroMonitor
-  ph_adc_pin: GPIO26
+  ph_adc_pin: GPIO36
   setup_ap_password: hydromonitor
   # Калибровка pH — подстрой под свои буферные растворы
   ph_cal_midpoint: "2500.0"     # mV при pH 7.0 (измерь в растворе pH 7.0)
@@ -132,10 +132,10 @@ sensor:
     filters:
       - median:
           window_size: 7
-          send_every: 15
+          send_every: 7
       - sliding_window_moving_average:
-          window_size: 20
-          send_every: 20
+          window_size: 10
+          send_every: 10
       - lambda: return x * 1000.0;
 
   # Расчёт pH из напряжения

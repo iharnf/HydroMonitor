@@ -2,11 +2,6 @@ substitutions:
   device_name: hydromonitor
   friendly_name: HydroMonitor
   ph_adc_pin: GPIO36
-  display_spi_clk: GPIO13
-  display_spi_mosi: GPIO15
-  display_cs: GPIO5
-  display_dc: GPIO14
-  display_reset: GPIO12
   setup_ap_password: hydromonitor
 
 esphome:
@@ -16,11 +11,22 @@ esphome:
   project:
     name: hydromonitor.ph_monitor
     version: "0.1.3"
+  # Удержание питания: GPIO4 должен быть высоким для работы M5StickC Plus2
+  on_boot:
+    priority: -100
+    then:
+      - output.turn_on: power_hold
 
 esp32:
   board: m5stick-c
   framework:
     type: arduino
+
+# Выход для поддержания питания
+output:
+  - platform: gpio
+    pin: GPIO4
+    id: power_hold
 
 logger:
 
@@ -44,13 +50,10 @@ web_server:
   include_internal: true
   local: true
 
-time:
-  - platform: homeassistant
-    id: homeassistant_time
-
+# Пины для дисплея ST7789v2
 spi:
-  clk_pin: ${display_spi_clk}
-  mosi_pin: ${display_spi_mosi}
+  clk_pin: GPIO13
+  mosi_pin: GPIO15
 
 font:
   - file: "gfonts://Roboto Condensed"
@@ -88,12 +91,6 @@ color:
     green: 85%
     blue: 45%
 
-globals:
-  - id: ph_ready
-    type: bool
-    restore_value: no
-    initial_value: "false"
-
 sensor:
   - platform: adc
     id: ph_probe_voltage
@@ -108,104 +105,42 @@ sensor:
     filters:
       - median:
           window_size: 7
-          send_every: 3
-          send_first_at: 1
       - sliding_window_moving_average:
           window_size: 20
-          send_every: 5
-          send_first_at: 1
       - lambda: return x * 1000.0;
-
   - platform: wifi_signal
     id: wifi_rssi
     name: "WiFi RSSI"
     update_interval: 60s
     entity_category: diagnostic
 
-  - platform: uptime
-    id: device_uptime
-    name: "Uptime"
-    update_interval: 60s
-    entity_category: diagnostic
-
-  # DS18B20 будет добавлен в v0.3.0.
-  # План подключения:
-  #   DATA -> GPIO32
-  #   VCC  -> 5V
-  #   GND  -> GND
-  #   резистор 4.7 кОм между DATA и VCC
-  #
-  # - platform: dallas_temp
-  #   id: water_temperature
-  #   name: "Water Temperature"
-  #   update_interval: 30s
-
-text_sensor:
-  - platform: wifi_info
-    ip_address:
-      name: "IP Address"
-      entity_category: diagnostic
-
-binary_sensor:
-  - platform: status
-    name: "Status"
-
-button:
-  - platform: restart
-    name: "Restart"
-    entity_category: diagnostic
-
-  - platform: template
-    name: "Calibration Placeholder"
-    entity_category: config
-    on_press:
-      - logger.log: "Calibration will be implemented in v0.2.0 after real mV values are verified."
-
-interval:
-  - interval: 10s
-    then:
-      - logger.log:
-          format: "HydroMonitor alive. Probe voltage: %.0f mV"
-          args: [ 'id(ph_probe_voltage).state' ]
-
 display:
   - platform: st7789v
     id: lcd
     model: Custom
+    # Распиновка дисплея для M5StickC Plus2
+    cs_pin: GPIO5
+    dc_pin: GPIO14
+    reset_pin: GPIO12
+    backlight_pin: GPIO27
     width: 135
     height: 240
     offset_width: 52
     offset_height: 40
-    cs_pin: ${display_cs}
-    dc_pin: ${display_dc}
-    reset_pin: ${display_reset}
     rotation: 270
     update_interval: 1s
     lambda: |-
       it.fill(id(color_bg));
+      it.printf(67, 4, id(font_title), id(color_muted), TextAlign::TOP_CENTER, "HYDROMONITOR");
 
-      it.printf(120, 4, id(font_title), id(color_muted), TextAlign::TOP_CENTER, "HYDROMONITOR");
-      it.printf(120, 23, id(font_ph), id(color_muted), TextAlign::TOP_CENTER, "--.--");
-
-      it.printf(16, 88, id(font_label), id(color_muted), TextAlign::TOP_LEFT, "Probe");
       if (id(ph_probe_voltage).has_state()) {
-        it.printf(224, 82, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "%.0f mV", id(ph_probe_voltage).state);
+        it.printf(67, 23, id(font_ph), id(color_text), TextAlign::TOP_CENTER, "%.0f", id(ph_probe_voltage).state);
       } else {
-        it.printf(224, 82, id(font_value), id(color_text), TextAlign::TOP_RIGHT, "---- mV");
+        it.printf(67, 23, id(font_ph), id(color_muted), TextAlign::TOP_CENTER, "--.--");
       }
+
+      it.printf(5, 88, id(font_label), id(color_muted), TextAlign::TOP_LEFT, "Probe mV");
 
       if (id(wifi_rssi).has_state()) {
-        int bars = 1;
-        if (id(wifi_rssi).state > -55) {
-          bars = 4;
-        } else if (id(wifi_rssi).state > -67) {
-          bars = 3;
-        } else if (id(wifi_rssi).state > -78) {
-          bars = 2;
-        }
-        it.printf(16, 132, id(font_label), id(color_text), TextAlign::BOTTOM_LEFT, "WiFi %d/4", bars);
-      } else {
-        it.printf(16, 132, id(font_label), id(color_muted), TextAlign::BOTTOM_LEFT, "WiFi --");
+        it.printf(5, 132, id(font_label), id(color_text), TextAlign::BOTTOM_LEFT, "WiFi: %d dBm", (int)id(wifi_rssi).state);
       }
-
-      it.printf(224, 132, id(font_label), id(color_ok), TextAlign::BOTTOM_RIGHT, "USB");

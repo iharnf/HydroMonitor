@@ -201,16 +201,12 @@ binary_sensor:
     pin:
       number: GPIO37
       inverted: true
-      mode:
-        input: true
   - platform: gpio
     id: button_b
     name: "Button B"
     pin:
       number: GPIO39
       inverted: true
-      mode:
-        input: true
     on_press:
       then:
         - logger.log: "Button B pressed"

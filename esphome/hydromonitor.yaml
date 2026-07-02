@@ -197,16 +197,10 @@ text_sensor:
 binary_sensor:
   - platform: gpio
     id: button_a
-    name: "Button A"
     pin: GPIO37
-    filters:
-      - invert:
   - platform: gpio
     id: button_b
-    name: "Button B"
     pin: GPIO39
-    filters:
-      - invert:
     on_press:
       then:
         - logger.log: "Button B pressed"
@@ -224,7 +218,7 @@ display:
     height: 240
     offset_width: 52
     offset_height: 40
-    rotation: 180
+    rotation: 0
     update_interval: 1s
     lambda: |-
       // --- фон ---

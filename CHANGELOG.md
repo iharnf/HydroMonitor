@@ -4,6 +4,7 @@
 
 - Исправлены пины TFT для M5StickC Plus2: DC=GPIO14, RST=GPIO12 (были ошибочно GPIO23 и GPIO18 от оригинального M5StickC PLUS).
 - Убран display_backlight — на Plus2 нет AXP192, подсветка всегда включена.
+- Убрана готовая модель `TTGO TDisplay 135x240`, дисплей настроен вручную (`Custom`): dimensions 135×240, offset_width=52, offset_height=40 — согласно документации M5Stack и ST7789V2.
 
 ## 0.1.2
 

@@ -171,7 +171,12 @@ interval:
 display:
   - platform: st7789v
     id: lcd
-    model: TTGO TDisplay 135x240
+    model: Custom
+    dimensions:
+      width: 135
+      height: 240
+    offset_width: 52
+    offset_height: 40
     cs_pin: ${display_cs}
     dc_pin: ${display_dc}
     reset_pin: ${display_reset}

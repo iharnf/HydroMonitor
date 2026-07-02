@@ -1,7 +1,7 @@
 substitutions:
   device_name: hydromonitor
   friendly_name: HydroMonitor
-  ph_adc_pin: GPIO36
+  ph_adc_pin: GPIO26
   setup_ap_password: hydromonitor
   # Калибровка pH — подстрой под свои буферные растворы
   ph_cal_midpoint: "2500.0"     # mV при pH 7.0 (измерь в растворе pH 7.0)
@@ -193,6 +193,30 @@ text_sensor:
       return "НОРМА";
     icon: "mdi:alert-circle-outline"
 
+# === Кнопки M5StickC Plus2 ===
+binary_sensor:
+  - platform: gpio
+    id: button_a
+    name: "Button A"
+    pin:
+      number: GPIO37
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+  - platform: gpio
+    id: button_b
+    name: "Button B"
+    pin:
+      number: GPIO39
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    on_press:
+      then:
+        - logger.log: "Button B pressed"
+
 # === Дисплей ===
 display:
   - platform: st7789v
@@ -206,16 +230,14 @@ display:
     height: 240
     offset_width: 52
     offset_height: 40
-    rotation: 270
+    rotation: 180
     update_interval: 1s
     lambda: |-
       // --- фон ---
       it.fill(id(color_bg));
 
-      // --- логические размеры (с rotation=270: get_width=240, get_height=135) ---
-      int w = it.get_width();
-      int h = it.get_height();
-      int cx = w / 2;  // центр по X = 120
+      // --- портрет: get_width()=135, get_height()=240 ---
+      int cx = it.get_width() / 2;  // = 67
 
       // --- читаем данные ---
       float ph = id(ph_value).has_state() ? id(ph_value).state : NAN;
@@ -224,7 +246,7 @@ display:
       float rssi = id(wifi_rssi).has_state() ? id(wifi_rssi).state : NAN;
       std::string status = id(ph_status).has_state() ? id(ph_status).state : "----";
 
-      // --- определяем цвет pH ---
+      // --- определяем цвет по pH ---
       Color ph_color;
       Color status_color;
       bool is_alarm = false;
@@ -244,19 +266,19 @@ display:
         status_color = id(color_green);
       }
 
-      // --- мигание при тревоге (500ms) ---
+      // --- мигание при тревоге ---
       bool blink_on = (millis() / 500) % 2 == 0;
 
-      // --- рисуем (логические координаты 240×135) ---
+      // --- рисуем (портрет 135×240) ---
 
-      // Статус слева вверху
+      // Статус (НОРМА/ВНИМАНИЕ/ТРЕВОГА) — слева вверху
       it.printf(3, 2, id(font_status), status_color, TextAlign::TOP_LEFT, "%s", status.c_str());
 
-      // HYDROPONIC по центру верха
+      // HYDROPONIC — cyan по центру
       it.printf(cx, 2, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
 
       // Большое значение pH — центр
-      int ph_y = 28;
+      int ph_y = 30;
       if (isnan(ph)) {
         it.printf(cx, ph_y, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
       } else if (is_alarm && !blink_on) {
@@ -266,28 +288,25 @@ display:
       }
 
       // Блок данных — левый край
-      int data_y = 90;
-      int line_h = 14;
+      int data_y = 96;
+      int line_h = 16;
 
-      if (!isnan(temp)) {
-        it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
-      } else {
-        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
-      }
+      if (!isnan(temp))
+        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
+      else
+        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
       data_y += line_h;
 
-      if (!isnan(mv)) {
-        it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
-      } else {
-        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
-      }
+      if (!isnan(mv))
+        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
+      else
+        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
       data_y += line_h;
 
-      if (!isnan(rssi)) {
-        it.printf(3, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "%.0f dBm", rssi);
-      } else {
-        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "-- dBm");
-      }
+      if (!isnan(rssi))
+        it.printf(5, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "%.0f dBm", rssi);
+      else
+        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "-- dBm");
       data_y += line_h;
 
-      it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "USB POWER");
+      it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "USB POWER");

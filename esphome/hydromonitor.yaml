@@ -74,12 +74,12 @@ font:
     glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_ph
-    size: 52
+    size: 68
     glyphs: ' -.0123456789'
   - file: "gfonts://Roboto Condensed"
     id: font_data
     size: 14
-    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
+    glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя▂▄▆█'
 
 # === Цвета ===
 color:
@@ -131,11 +131,8 @@ sensor:
     state_class: measurement
     filters:
       - median:
-          window_size: 7
-          send_every: 7
-      - sliding_window_moving_average:
-          window_size: 10
-          send_every: 10
+          window_size: 5
+          send_every: 1
       - lambda: return x * 1000.0;
 
   # Расчёт pH из напряжения
@@ -224,7 +221,6 @@ display:
       // --- фон ---
       it.fill(id(color_bg));
 
-      // --- портрет: get_width()=135, get_height()=240 ---
       int cx = it.get_width() / 2;  // = 67
 
       // --- читаем данные ---
@@ -234,7 +230,7 @@ display:
       float rssi = id(wifi_rssi).has_state() ? id(wifi_rssi).state : NAN;
       std::string status = id(ph_status).has_state() ? id(ph_status).state : "----";
 
-      // --- определяем цвет по pH ---
+      // --- цвет по pH ---
       Color ph_color;
       Color status_color;
       bool is_alarm = false;
@@ -254,19 +250,31 @@ display:
         status_color = id(color_green);
       }
 
-      // --- мигание при тревоге ---
       bool blink_on = (millis() / 500) % 2 == 0;
 
-      // --- рисуем (портрет 135×240) ---
+      // --- бары сигнала ▂▄▆█ ---
+      std::string bars;
+      if (isnan(rssi)) {
+        bars = "----";
+      } else {
+        int s = (int)rssi;
+        if (s > -50)      bars = "███";
+        else if (s > -60) bars = "▆▆█";
+        else if (s > -70) bars = "▆▄█";
+        else if (s > -80) bars = "▄▂█";
+        else              bars = "▂▂▂";
+      }
 
-      // Статус (НОРМА/ВНИМАНИЕ/ТРЕВОГА) — слева вверху
-      it.printf(3, 2, id(font_status), status_color, TextAlign::TOP_LEFT, "%s", status.c_str());
+      // ========== РИСУЕМ ==========
 
-      // HYDROPONIC — cyan по центру
+      // HYDROPONIC — верхняя строка, по центру
       it.printf(cx, 2, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
 
-      // Большое значение pH — центр
-      int ph_y = 30;
+      // Статус — строка ниже, слева (чтобы не налезало на HYDROPONIC)
+      it.printf(3, 20, id(font_status), status_color, TextAlign::TOP_LEFT, "%s", status.c_str());
+
+      // pH — крупно, по центру
+      int ph_y = 44;
       if (isnan(ph)) {
         it.printf(cx, ph_y, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
       } else if (is_alarm && !blink_on) {
@@ -276,25 +284,25 @@ display:
       }
 
       // Блок данных — левый край
-      int data_y = 96;
-      int line_h = 16;
+      int data_y = 128;
+      int line_h = 15;
 
+      // Температура
       if (!isnan(temp))
         it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
       else
         it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
       data_y += line_h;
 
+      // mV
       if (!isnan(mv))
         it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
       else
         it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
       data_y += line_h;
 
+      // Сигнал с барами
       if (!isnan(rssi))
-        it.printf(5, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "%.0f dBm", rssi);
+        it.printf(5, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "S: %.0f dB %s", rssi, bars.c_str());
       else
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "-- dBm");
-      data_y += line_h;
-
-      it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "USB POWER");
+        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "S: -- dB ----");

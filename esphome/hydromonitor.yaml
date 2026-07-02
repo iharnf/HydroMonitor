@@ -207,10 +207,15 @@ display:
     offset_width: 52
     offset_height: 40
     rotation: 270
-    update_interval: 250ms
+    update_interval: 1s
     lambda: |-
       // --- фон ---
       it.fill(id(color_bg));
+
+      // --- логические размеры (с rotation=270: get_width=240, get_height=135) ---
+      int w = it.get_width();
+      int h = it.get_height();
+      int cx = w / 2;  // центр по X = 120
 
       // --- читаем данные ---
       float ph = id(ph_value).has_state() ? id(ph_value).state : NAN;
@@ -242,50 +247,47 @@ display:
       // --- мигание при тревоге (500ms) ---
       bool blink_on = (millis() / 500) % 2 == 0;
 
-      // --- рисуем (портрет 135×240, как на скриншоте) ---
+      // --- рисуем (логические координаты 240×135) ---
 
-      // Верхняя строка: статус слева (НОРМА/ВНИМАНИЕ/ТРЕВОГА)
+      // Статус слева вверху
       it.printf(3, 2, id(font_status), status_color, TextAlign::TOP_LEFT, "%s", status.c_str());
 
-      // "HYDROPONIC" — cyan по центру
-      it.printf(67, 20, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
+      // HYDROPONIC по центру верха
+      it.printf(cx, 2, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
 
       // Большое значение pH — центр
+      int ph_y = 28;
       if (isnan(ph)) {
-        it.printf(67, 42, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
+        it.printf(cx, ph_y, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
       } else if (is_alarm && !blink_on) {
-        it.printf(67, 42, id(font_ph), id(color_bg), TextAlign::TOP_CENTER, "%.2f", ph);
+        it.printf(cx, ph_y, id(font_ph), id(color_bg), TextAlign::TOP_CENTER, "%.2f", ph);
       } else {
-        it.printf(67, 42, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
+        it.printf(cx, ph_y, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
       }
 
-      // Блок данных (как на скриншоте — столбик слева)
-      int data_y = 104;
-      int line_h = 16;
+      // Блок данных — левый край
+      int data_y = 90;
+      int line_h = 14;
 
-      // Температура
       if (!isnan(temp)) {
-        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
+        it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.1f°C", temp);
       } else {
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
+        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "--.-°C");
       }
       data_y += line_h;
 
-      // mV
       if (!isnan(mv)) {
-        it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
+        it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "%.0fmV", mv);
       } else {
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
+        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "----mV");
       }
       data_y += line_h;
 
-      // WiFi
       if (!isnan(rssi)) {
-        it.printf(5, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "%.0f dBm", rssi);
+        it.printf(3, data_y, id(font_data), id(color_cyan), TextAlign::TOP_LEFT, "%.0f dBm", rssi);
       } else {
-        it.printf(5, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "-- dBm");
+        it.printf(3, data_y, id(font_data), id(color_gray), TextAlign::TOP_LEFT, "-- dBm");
       }
       data_y += line_h;
 
-      // USB POWER
-      it.printf(5, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "USB POWER");
+      it.printf(3, data_y, id(font_data), id(color_white), TextAlign::TOP_LEFT, "USB POWER");

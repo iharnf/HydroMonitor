@@ -198,15 +198,15 @@ binary_sensor:
   - platform: gpio
     id: button_a
     name: "Button A"
-    pin:
-      number: GPIO37
-      inverted: true
+    pin: GPIO37
+    filters:
+      - invert:
   - platform: gpio
     id: button_b
     name: "Button B"
-    pin:
-      number: GPIO39
-      inverted: true
+    pin: GPIO39
+    filters:
+      - invert:
     on_press:
       then:
         - logger.log: "Button B pressed"

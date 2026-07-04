@@ -4,8 +4,8 @@ substitutions:
   ph_adc_pin: GPIO36
   setup_ap_password: hydromonitor
   # Калибровка pH — подстрой под свои буферные растворы
-  ph_cal_midpoint: "2535.0"     # mV при pH 7.0 (из даташита PH-4502C)
-  ph_cal_slope: "167.5"         # mV/pH (из даташита, среднее между 4-7 и 7-10)
+  ph_cal_midpoint: "2610"       # mV при pH 7.0 (измерено в буфере pH 7.0)
+  ph_cal_slope: "156.67"        # mV/pH (измерено: (3080-2610)/3)
 
 esphome:
   name: ${device_name}

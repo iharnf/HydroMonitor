@@ -29,21 +29,6 @@ output:
     pin: GPIO4
     id: power_hold
 
-# === Калибровка pH — хранится в flash-памяти ===
-globals:
-  - id: cal_midpoint
-    type: float
-    restore_value: true
-    initial_value: '${ph_cal_midpoint}'
-  - id: cal_notice
-    type: std::string
-    restore_value: false
-    initial_value: '""'
-  - id: cal_notice_counter
-    type: int
-    restore_value: false
-    initial_value: '0'
-
 logger:
 
 api:
@@ -162,20 +147,11 @@ sensor:
     lambda: |-
       if (!id(ph_probe_voltage).has_state()) return NAN;
       float mv = id(ph_probe_voltage).state;
-      float ph = 7.0 - (mv - id(cal_midpoint)) / ${ph_cal_slope};
+      float cal_mid = ${ph_cal_midpoint};
+      float cal_slope = ${ph_cal_slope};
+      float ph = 7.0 - (mv - cal_mid) / cal_slope;
       if (ph < 0.0 || ph > 14.0) return NAN;
       return ph;
-
-  # Текущий сохранённый midpoint калибровки (mV)
-  - platform: template
-    id: cal_midpoint_sensor
-    name: "pH Cal Midpoint"
-    unit_of_measurement: "mV"
-    accuracy_decimals: 0
-    entity_category: diagnostic
-    update_interval: 1s
-    lambda: |-
-      return id(cal_midpoint);
 
   # Температура воды DS18B20
   - platform: dallas_temp
@@ -224,12 +200,7 @@ binary_sensor:
     pin: GPIO39
     on_press:
       then:
-        - lambda: |-
-            float mv = id(ph_probe_voltage).state;
-            id(cal_midpoint) = mv;
-            id(cal_notice) = "CAL pH7 OK";
-            id(cal_notice_counter) = 3;
-            ESP_LOGI("cal", "pH7 calibrated: midpoint = %.0f mV", mv);
+        - logger.log: "Button B pressed"
 
 # === Дисплей ===
 display:
@@ -269,12 +240,7 @@ display:
       it.printf(cx, 0, id(font_header), id(color_cyan), TextAlign::TOP_CENTER, "HYDROPONIC");
 
       // Статус — центрирован, строкой ниже
-      if (id(cal_notice_counter) > 0) {
-        id(cal_notice_counter)--;
-        it.printf(cx, 18, id(font_status), id(color_green), TextAlign::TOP_CENTER, "%s", id(cal_notice).c_str());
-      } else {
-        it.printf(cx, 18, id(font_status), st_color, TextAlign::TOP_CENTER, "%s", status.c_str());
-      }
+      it.printf(cx, 18, id(font_status), st_color, TextAlign::TOP_CENTER, "%s", status.c_str());
 
       // pH — всегда видимое, без мигания
       if (isnan(ph))

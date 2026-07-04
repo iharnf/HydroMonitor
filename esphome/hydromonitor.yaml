@@ -74,7 +74,7 @@ font:
     glyphs: ' !"%()+,-_.:0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz°АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя'
   - file: "gfonts://Roboto Condensed"
     id: font_ph
-    size: 56
+    size: 62
     glyphs: ' -.0123456789'
   - file: "gfonts://Roboto Condensed"
     id: font_data
@@ -246,7 +246,7 @@ display:
       if (isnan(ph))
         it.printf(cx, 40, id(font_ph), id(color_gray), TextAlign::TOP_CENTER, "--.--");
       else
-        it.printf(cx, 40, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
+        it.printf(cx, 38, id(font_ph), ph_color, TextAlign::TOP_CENTER, "%.2f", ph);
 
       // Температура — оранжевая
       if (!isnan(temp))

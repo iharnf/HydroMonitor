@@ -151,7 +151,11 @@ sensor:
       float cal_slope = ${ph_cal_slope};
       float ph = 7.0 - (mv - cal_mid) / cal_slope;
       if (ph < 0.0 || ph > 14.0) return NAN;
-      return ph;
+      return roundf(ph * 100.0f) / 100.0f;
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 1
 
   # Температура воды DS18B20
   - platform: dallas_temp

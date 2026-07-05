@@ -219,7 +219,7 @@ display:
     height: 240
     offset_width: 52
     offset_height: 40
-    rotation: 0
+    rotation: 180
     update_interval: 1s
     lambda: |-
       it.fill(id(color_bg));
